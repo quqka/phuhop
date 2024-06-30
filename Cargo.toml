@@ -1,0 +1,21 @@
+workspace = { members = ["crates/phuhop_core", "crates/plugina"] }
+[package]
+name = "phuhop"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+log = "0.4"
+serde = { version = "1", features = ["derive"] }
+hot-lib-reloader = { version = "^0.6", optional = true }
+env_logger = "0.11.3"
+phuhop_core = { path = "crates/phuhop_core", version = "*" }
+egui_virtual_list = "0.3.0"
+rfd = "0.14.1"
+
+
+[features]
+default = []
+reload = ["dep:hot-lib-reloader"]
