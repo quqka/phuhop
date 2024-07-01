@@ -1,2 +1,2 @@
 mod plugin;
-pub use self::plugin::PluginManager;
+pub use self::plugin::PluginWindow;

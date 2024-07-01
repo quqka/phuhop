@@ -1,31 +1,64 @@
-use libloading::Library;
 
-pub trait PluginRegistrar {
-    fn register_plugin(&mut self, plugin: Box<dyn Plugin>);
-}
+use libloading::{Library, Symbol};
+use std::collections::HashMap;
+use std::ffi::CString;
+use std::path::PathBuf;
 
 pub trait Plugin {
-    fn run(&self);
-    fn name(&self) -> &'static str;
+    fn name(&self) -> &str;
+    fn execute(&self);
 }
 
-pub struct Registrar {
-    pub plugins: Vec<Box<dyn Plugin>>,
+type PluginInitFunc = unsafe extern "Rust" fn() -> *mut dyn Plugin;
+
+pub struct PluginManager {
+    plugins: HashMap<String, Box<dyn Plugin>>,
+    loaded_libraries: HashMap<String, Library>,
 }
 
-impl PluginRegistrar for Registrar {
-    fn register_plugin(&mut self, plugin: Box<dyn Plugin>) {
-        self.plugins.push(plugin);
+impl PluginManager {
+    pub fn new() -> Self {
+        PluginManager {
+            plugins: HashMap::new(),
+            loaded_libraries: HashMap::new(),
+        }
     }
-}
 
-pub fn load_plugin(lib_name: String, registrar: &mut Registrar) -> Result<&str, std::io::Error> {
-    let lib = Box::leak(Box::new(unsafe { Library::new(lib_name).unwrap() }));
-    unsafe {        
-        let func: libloading::Symbol<unsafe extern "Rust" fn(&mut dyn PluginRegistrar) -> ()> =
-            lib.get(b"plugin_entry").unwrap();
-        func(registrar);
+    pub fn run_plugins(&mut self) {
+        for plugin in self.plugins.values_mut() {
+            plugin.execute();
+        }
     }
-    Ok("success")
+    
+
+    pub fn load_plugin(&mut self, path: &str) -> Result<(), String> {
+        let lib_path = PathBuf::from(path);
+        if !lib_path.exists() || !lib_path.is_file() {
+            return Err(format!("{} does not exist or is not a file.", path));
+        }
+
+        let lib = unsafe { Library::new(path) };
+        match lib {
+            Ok(library) => {
+                unsafe {
+                    let init_func: Symbol<PluginInitFunc> = library.get(b"register").unwrap();
+                    let plugin_ptr = init_func();
+                    if !plugin_ptr.is_null() {
+                        let plugin_box: Box<dyn Plugin> = Box::from_raw(plugin_ptr);
+                        let plugin_name = CString::from_vec_unchecked(plugin_box.name().into())
+                            .into_string()
+                            .unwrap();
+                        self.plugins.insert(plugin_name, plugin_box);
+                        self.loaded_libraries.insert(path.to_owned(), library);
+                        Ok(())
+                    } else {
+                        Err("Failed to create plugin instance.".to_string())
+                    }
+                }
+            },
+            Err(e) => Err(format!("Failed to load library {}: {}", path, e)),
+        }
+    }
+
 }
 

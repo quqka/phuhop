@@ -11,10 +11,9 @@ log = "0.4"
 serde = { version = "1", features = ["derive"] }
 hot-lib-reloader = { version = "^0.6", optional = true }
 env_logger = "0.11.3"
-phuhop_core = { path = "crates/phuhop_core", version = "*" }
+phuhop_core = { path = "crates/phuhop_core", version = "*", default-features = false, features = ["core", "ui"] }
 egui_virtual_list = "0.3.0"
 rfd = "0.14.1"
-
 
 [features]
 default = []

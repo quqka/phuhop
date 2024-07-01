@@ -1,13 +1,13 @@
 use egui_virtual_list::VirtualList;
 use phuhop_core::egui;
 
-pub struct PluginManager {
+pub struct PluginWindow {
     items: Vec<String>,
     virtual_list: VirtualList,
     search_string: String,
 }
 
-impl PluginManager {
+impl PluginWindow {
     pub fn new() -> Self {
         Self { items: vec!["plugina".to_string()], virtual_list: VirtualList::new(), search_string: "".to_string()}
     }
@@ -26,7 +26,6 @@ impl PluginManager {
                     ui.horizontal(|ui| {
                         ui.label(item);
                         ui.checkbox(&mut true, "Loaded");
-                        ui.checkbox(&mut true, "Auto Load");
                     });
                     1
                 });

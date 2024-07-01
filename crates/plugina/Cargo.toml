@@ -7,4 +7,4 @@ edition = "2021"
 crate-type = ["dylib"]
 
 [dependencies]
-phuhop_core = { path = "../phuhop_core", version="*" }
+phuhop_core = { path = "../phuhop_core", version="*", default-features = false ,features = ["core"]}

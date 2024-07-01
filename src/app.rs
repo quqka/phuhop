@@ -1,5 +1,5 @@
 use phuhop_core::{eframe, egui};
-use crate::windows::PluginManager;
+use crate::windows::PluginWindow;
 
 fn load_fonts(ctx: &egui::Context) {
     let mut fonts = egui::FontDefinitions::default();
@@ -17,10 +17,10 @@ fn load_fonts(ctx: &egui::Context) {
 pub struct MyApp {
     view: bool,
     show_preferences: bool,
-    show_plugin_manager: bool,
+    show_plugin_window: bool,
+
     #[serde(skip)]
-    plugin_manager: PluginManager,
-    // value: f32,
+    plugin_window: PluginWindow,
 }
 
 impl Default for MyApp {
@@ -28,8 +28,8 @@ impl Default for MyApp {
         Self {
             view: true,
             show_preferences: false,
-            show_plugin_manager: false,
-            plugin_manager: PluginManager::new(),
+            show_plugin_window: false,
+            plugin_window: PluginWindow::new(),
         }
     }
 }
@@ -80,14 +80,14 @@ impl eframe::App for MyApp {
                     // if ui.checkbox(&mut self.view, "3D View").changed() { }
                     ui.add_space(8.0);
                     if ui.button("Plugin Manager").clicked() {
-                        self.show_plugin_manager = true;
+                        self.show_plugin_window = true;
                         ui.ctx().request_repaint();
                     }
                 });
                 
             });
         });
-        self.plugin_manager.show(ctx, &mut self.show_plugin_manager);
+        self.plugin_window.show(ctx, &mut self.show_plugin_window);
         // if self.show_preferences {
         //     egui::Window::new("Preferences")
         //         .open(&mut self.show_preferences)
